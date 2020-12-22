@@ -2,7 +2,7 @@
     pageEncoding="UTF-8"%>
 <%
 	String contextPath = request.getContextPath();
-	out.println(contextPath);
+	//out.println(contextPath);
 %>
 
 <!DOCTYPE html>
@@ -12,7 +12,6 @@
 <title>Insert title here</title>
 </head>
 <body>
-<h1>URL방식 안됨!! URL방식으로 요청하기</h1>
 <ul>
 	<li><a href="<%=contextPath %>/user?gubun=login">로그인</a></li>
 	<li><a href="<%=contextPath %>/user?gubun=join">회원가입</a></li>
