@@ -1,4 +1,4 @@
-package com.cos.hello.controller;
+package com.cos.hello.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-class Users {
+
+public class Users {
 	private int id; //primary key, Auto-increment
 	private String username;
 	private String password;

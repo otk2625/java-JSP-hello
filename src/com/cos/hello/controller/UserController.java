@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 //javax로 시작하는 패키지는 톰켓이 들고 있는 라이브러리
 import javax.servlet.http.HttpServlet;
@@ -13,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.cos.hello.config.DBConn;
+import com.cos.hello.model.Users;
 
 public class UserController extends HttpServlet {
 
@@ -43,21 +45,26 @@ public class UserController extends HttpServlet {
 
 	}
 
-	private void route(String gubun, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+	private void route(String gubun, HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
 		if (gubun.equals("login")) {
 			resp.sendRedirect("auth/login.jsp"); // 한번더 request
 		} else if (gubun.equals("join")) {
 			resp.sendRedirect("auth/join.jsp"); // 한번더 request
 		} else if (gubun.equals("selectOne")) {
+			// 인증이 필요한 페이지
+			String result;
 			HttpSession session = req.getSession();
 			if(session.getAttribute("sessionUser") != null) {
 				Users user = (Users)session.getAttribute("sessionUser");
-				System.out.println("인증되었습니다.");
+				result = "인증되었습니다.";
 				System.out.println(user);
 			} else {
-				System.out.println("인증되지 않았습니다.");
+				result = "인증되지 않았습니다.";
 			}
-			resp.sendRedirect("user/selectOne.jsp"); // 한번더 request
+			req.setAttribute("result", result); //결과값 jsp에던지기 req에 저장하는게 좋음
+			RequestDispatcher dis =
+					req.getRequestDispatcher("user/selectOne.jsp");
+			dis.forward(req, resp); //여기서 유지됨
 		} else if (gubun.equals("updateOne")) {
 			resp.sendRedirect("user/updateOne.jsp"); // 한번더 request
 		} else if (gubun.equals("joinProc")) { // 회원가입 수행
@@ -78,12 +85,13 @@ public class UserController extends HttpServlet {
 			System.out.println(password);
 			System.out.println(email);
 			System.out.println("==================join END==================");
-			String sql = "INSERT INTO users(username, password, email) VALUES ('"+username+"', '"+password+"', '"+email+"')";
+			String sql = "DELETE FROM users WHERE id = 2";
 			Connection conn = DBConn.getInstance();
 			PreparedStatement pstmt;
 			
 			try {
 				pstmt = conn.prepareStatement(sql);
+				System.out.println("sql완료");
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
