@@ -14,8 +14,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.cos.hello.config.DBConn;
+import com.cos.hello.dao.UsersDao;
 import com.cos.hello.model.Users;
 
+//디스패쳐의 역할 = 분기 = 필요한 view를 응답해주는 것
 public class UserController extends HttpServlet {
 
 	// req와 res는 톰켓이 만들어준다. (클라이언트의 요청이 있을때마다)
@@ -76,31 +78,29 @@ public class UserController extends HttpServlet {
 			String username = req.getParameter("username");
 			String password = req.getParameter("password");
 			String email = req.getParameter("email");
-			// 2번 DB에 연결해서 3가지 값을 INSERT하기
-			// 생략
-
-			// 3번 INSERT가 정상적으로 되었다면 index.jsp를 응답!
+			
 			System.out.println("=================join START=================");
 			System.out.println(username);
 			System.out.println(password);
 			System.out.println(email);
 			System.out.println("==================join END==================");
-			String sql = "DELETE FROM users WHERE id = 2";
-			Connection conn = DBConn.getInstance();
-			PreparedStatement pstmt;
 			
-			try {
-				pstmt = conn.prepareStatement(sql);
-				System.out.println("sql완료");
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			// 2번 DB에 연결해서 3가지 값을 INSERT하기
+			Users user = Users.builder()
+					.username(username)
+					.password(password)
+					.email(email)
+					.build();
+			
+			UsersDao usersDao = new UsersDao();
+			int result = usersDao.insert(user);
+			
+			if(result == 1) {
+				// 3번 INSERT가 정상적으로 되었다면 index.jsp를 응답!
+				resp.sendRedirect("auth/login.jsp");
+			}else {
+				resp.sendRedirect("auth/join.jsp");
 			}
-			
-			
-			
-			resp.sendRedirect("index.jsp");
-
 			
 		} else if(gubun.equals("loginProc")) {
 			// 1번 값 전달받기
