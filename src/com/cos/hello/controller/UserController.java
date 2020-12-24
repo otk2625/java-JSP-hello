@@ -16,6 +16,8 @@ import javax.servlet.http.HttpSession;
 import com.cos.hello.config.DBConn;
 import com.cos.hello.dao.UsersDao;
 import com.cos.hello.model.Users;
+import com.cos.hello.service.UserService;
+
 
 //디스패쳐의 역할 = 분기 = 필요한 view를 응답해주는 것
 public class UserController extends HttpServlet {
@@ -48,87 +50,27 @@ public class UserController extends HttpServlet {
 	}
 
 	private void route(String gubun, HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
+		UserService usersService = new UserService();
+		
+		
 		if (gubun.equals("login")) {
 			resp.sendRedirect("auth/login.jsp"); // 한번더 request
 		} else if (gubun.equals("join")) {
 			resp.sendRedirect("auth/join.jsp"); // 한번더 request
 		} else if (gubun.equals("selectOne")) {
-			// 인증이 필요한 페이지
-			String result;
-			HttpSession session = req.getSession();
-			if(session.getAttribute("sessionUser") != null) {
-				Users user = (Users)session.getAttribute("sessionUser");
-				result = "인증되었습니다.";
-				System.out.println(user);
-			} else {
-				result = "인증되지 않았습니다.";
-			}
-			req.setAttribute("result", result); //결과값 jsp에던지기 req에 저장하는게 좋음
-			RequestDispatcher dis =
-					req.getRequestDispatcher("user/selectOne.jsp");
-			dis.forward(req, resp); //여기서 유지됨
+			usersService.유저정보보기(req, resp);
 		} else if (gubun.equals("updateOne")) {
-			resp.sendRedirect("user/updateOne.jsp"); // 한번더 request
+			usersService.유저정보수정페이지(req, resp); // 한번더 request
 		} else if (gubun.equals("joinProc")) { // 회원가입 수행
-			// 데이터 원형 username = ssar & password = 1234 & email = ssar.nate.com
-
-			// 1번 form의 input태그에 있는 3가지 값 username, password, email받기
-			// getParameter함수는 get방식의 데이터와 post방식의 데이터를 다 받을 수 있음.
-			// 단, post 방식에서는 데이터 타입이 x-www-form-urlencoded방식만 받을 수 있음
-			String username = req.getParameter("username");
-			String password = req.getParameter("password");
-			String email = req.getParameter("email");
-			
-			System.out.println("=================join START=================");
-			System.out.println(username);
-			System.out.println(password);
-			System.out.println(email);
-			System.out.println("==================join END==================");
-			
-			// 2번 DB에 연결해서 3가지 값을 INSERT하기
-			Users user = Users.builder()
-					.username(username)
-					.password(password)
-					.email(email)
-					.build();
-			
-			UsersDao usersDao = new UsersDao();
-			int result = usersDao.insert(user);
-			
-			if(result == 1) {
-				// 3번 INSERT가 정상적으로 되었다면 index.jsp를 응답!
-				resp.sendRedirect("auth/login.jsp");
-			}else {
-				resp.sendRedirect("auth/join.jsp");
-			}
-			
+			//MVC패턴 적용, 모듈화
+			usersService.회원가입(req, resp);
 		} else if(gubun.equals("loginProc")) {
-			// 1번 값 전달받기
-			String username = req.getParameter("username");
-			String password = req.getParameter("password");
-			String email = req.getParameter("email");
-			System.out.println("=================login START=================");
-			System.out.println(username);
-			System.out.println(password);
-			System.out.println("==================login END==================");
-			// 2번 데이터베이스 값이 있는 select해서 확인
-			
-			
-			// 생략
-			Users user = Users.builder()
-					.id(2)
-					.username(username)
-					.password(password)
-					.email(email)
-					.build();
-			// 3번 
-			HttpSession session = req.getSession();
-			
-			session.setAttribute("sessionUser", user);
-
-			// 4번 index.jsp페이지로 이동
-			resp.sendRedirect("index.jsp"); //바디에 담기는 데이터
-		}
+			usersService.login(req, resp);
+		} else if(gubun.equals("updateProc")) {
+			usersService.유저정보수정(req, resp);
+		} else if(gubun.equals("deleteProc")) {
+			usersService.회원삭제(req, resp);
+		} 
 	}
 
 }
